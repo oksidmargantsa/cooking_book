@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://recipes:recipes@postgres:5432/recipes"
     jwt_secret: str
     jwt_algorithm: str = "HS256"
+    redis_url: str = "redis://redis:6379/0"
     minio_endpoint: str = "http://minio:9000"
     minio_access_key: str = "recipes-dev"
     minio_secret_key: str = "recipes-dev-password"
