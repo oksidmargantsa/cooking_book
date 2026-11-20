@@ -71,3 +71,9 @@ class AuthService:
         """Идемпотентно: неизвестный или уже отозванный токен — не ошибка."""
         await self.repo.revoke_refresh_token(hash_refresh_token(refresh_token), _now())
         await self.session.commit()
+
+    async def cleanup_expired_tokens(self) -> int:
+        """Для команды `api cleanup` (раз в сутки по cron, HLD раздел 9)."""
+        deleted = await self.repo.delete_expired_refresh_tokens(_now())
+        await self.session.commit()
+        return deleted
