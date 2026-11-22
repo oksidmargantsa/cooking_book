@@ -41,3 +41,19 @@ class Folder(Base):
     name: Mapped[str] = mapped_column(String(FOLDER_NAME_MAX_LEN))
     is_default: Mapped[bool] = mapped_column(Boolean, server_default=false())
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class FolderRecipe(Base):
+    __tablename__ = "folder_recipes"
+    __table_args__ = (
+        # нужен для каскада при удалении рецепта (PK начинается с folder_id)
+        Index("ix_folder_recipes_recipe_id", "recipe_id"),
+    )
+
+    folder_id: Mapped[int] = mapped_column(
+        ForeignKey("folders.id", ondelete="CASCADE"), primary_key=True
+    )
+    recipe_id: Mapped[int] = mapped_column(
+        ForeignKey("recipes.id", ondelete="CASCADE"), primary_key=True
+    )
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
