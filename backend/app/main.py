@@ -6,6 +6,7 @@ from app.modules.dictionaries.router import router as dictionaries_router
 from app.modules.folders.router import router as folders_router
 from app.modules.recipes.my_router import router as my_recipes_router
 from app.modules.recipes.router import router as recipes_router
+from app.modules.search.router import router as search_router
 from app.modules.uploads.router import router as uploads_router
 
 app = FastAPI(title="Recipes API")
@@ -18,4 +19,5 @@ api.include_router(uploads_router)
 api.include_router(recipes_router)
 api.include_router(my_recipes_router)
 api.include_router(dictionaries_router)
+api.include_router(search_router)
 app.include_router(api)
