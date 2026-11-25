@@ -1,5 +1,3 @@
-"""Пароли (argon2), access-токены (JWT), refresh-токены (случайная строка, в БД — только хеш)."""
-
 import hashlib
 import secrets
 from datetime import datetime, timezone
@@ -14,12 +12,12 @@ from app.core.constants import ACCESS_TOKEN_TTL
 from app.core.errors import unauthorized
 
 _hasher = PasswordHasher()
-# Для выравнивания времени ответа, когда логина нет в БД (защита от перебора логинов).
+
 DUMMY_HASH = _hasher.hash("dummy-password-for-timing")
 
 
 async def hash_password(password: str) -> str:
-    # argon2 — тяжёлая CPU-операция, не блокируем event loop
+
     return await run_in_threadpool(_hasher.hash, password)
 
 
@@ -54,7 +52,7 @@ def decode_access_token(token: str) -> int:
 
 
 def generate_refresh_token() -> tuple[str, str]:
-    """Возвращает (токен для клиента, его sha256 для БД)."""
+
     raw = secrets.token_urlsafe(48)
     return raw, hash_refresh_token(raw)
 

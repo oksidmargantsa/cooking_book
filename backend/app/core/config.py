@@ -4,8 +4,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Переменные окружения (.env). Лимиты и TTL токенов — в constants.py."""
-
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "postgresql+asyncpg://recipes:recipes@postgres:5432/recipes"
