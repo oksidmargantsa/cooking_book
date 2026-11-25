@@ -30,28 +30,26 @@ class AuthService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.repo = AuthRepository(session)
-        self.folders = FoldersService(session)  # модули общаются только через сервисы
+        self.folders = FoldersService(session)
 
     async def register(self, login: str, password: str) -> User:
-        """Пользователь и папка «Избранное» создаются в одной транзакции (F_Auth_1)."""
         if await self.repo.get_user_by_login(login) is not None:
             raise _login_exists()
 
-        password_hash = await hash_password(password)  # до транзакции записи — чтобы не держать её
+        password_hash = await hash_password(password)
         try:
             user = await self.repo.create_user(login, password_hash)
             await self.folders.create_default(user.id)
             await self.session.commit()
         except IntegrityError as exc:
             await self.session.rollback()
-            if "uq_users_login" in str(exc.orig):  # гонка двух регистраций с одним логином
+            if "uq_users_login" in str(exc.orig):
                 raise _login_exists() from None
             raise
         return user
 
     async def login(self, login: str, password: str) -> tuple[str, str]:
         user = await self.repo.get_user_by_login(login)
-        # Хеш проверяем всегда, чтобы время ответа не выдавало существование логина.
         password_ok = await verify_password(user.password_hash if user else DUMMY_HASH, password)
         if user is None or not password_ok:
             raise AppError(401, "INVALID_CREDENTIALS", "Неверный логин или пароль")
@@ -68,12 +66,10 @@ class AuthService:
         return create_access_token(token.user_id)
 
     async def logout(self, refresh_token: str) -> None:
-        """Идемпотентно: неизвестный или уже отозванный токен — не ошибка."""
         await self.repo.revoke_refresh_token(hash_refresh_token(refresh_token), _now())
         await self.session.commit()
 
     async def cleanup_expired_tokens(self) -> int:
-        """Для команды `api cleanup` (раз в сутки по cron, HLD раздел 9)."""
         deleted = await self.repo.delete_expired_refresh_tokens(_now())
         await self.session.commit()
         return deleted

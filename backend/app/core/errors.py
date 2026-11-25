@@ -1,5 +1,3 @@
-"""Единый формат ошибок {code, message, field} (HLD, раздел 5)."""
-
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse

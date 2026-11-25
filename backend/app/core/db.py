@@ -9,7 +9,6 @@ SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def get_session() -> AsyncIterator[AsyncSession]:
-    """Сессия на запрос. Коммит делает сервис в конце сценария;
-    если он не вызван (чтение, ошибка), сессия закрывается откатом."""
+
     async with SessionLocal() as session:
         yield session

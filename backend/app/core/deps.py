@@ -16,7 +16,7 @@ SessionDep = Annotated[AsyncSession, Depends(get_session)]
 async def get_current_user_id(
     creds: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
 ) -> int:
-    """id пользователя из access-токена; обращения к БД нет (HLD, раздел 10)."""
+
     if creds is None:
         raise unauthorized()
     return decode_access_token(creds.credentials)
