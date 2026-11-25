@@ -18,12 +18,9 @@ class FoldersService:
         self.session = session
         self.repo = FoldersRepository(session)
 
-    # ---------- вызывается из accounts ----------
     async def create_default(self, user_id: int) -> Folder:
-        """Создаёт «Избранное». Не коммитит: коммит делает регистрация (одна транзакция)."""
         return await self.repo.create(user_id, FAVORITES_FOLDER_NAME, is_default=True)
 
-    # ---------- папки ----------
     async def list_folders(self, user_id: int) -> list[Folder]:
         return list(await self.repo.list_by_user(user_id))
 
@@ -52,9 +49,7 @@ class FoldersService:
         await self.repo.delete(folder.id)
         await self.session.commit()
 
-    # ---------- рецепты в папках ----------
     async def add_recipe(self, user_id: int, folder_id: int, recipe_id: int) -> None:
-        """Идемпотентно добавляет рецепт в выбранную папку."""
         await self.repo.lock_owner(user_id)
         folder = await self._get_owned(folder_id, user_id)
         if not await self.repo.recipe_exists(recipe_id):
@@ -76,12 +71,10 @@ class FoldersService:
             await self.repo.add_recipe(folder.id, recipe_id)
             await self.session.commit()
         except IntegrityError:
-            # рецепт удалили между проверкой и вставкой (FK)
             await self.session.rollback()
             raise not_found("Рецепт не найден", "recipe_id") from None
 
     async def remove_recipe(self, user_id: int, folder_id: int, recipe_id: int) -> None:
-        """Идемпотентно удаляет рецепт из выбранной папки."""
         await self.repo.lock_owner(user_id)
         folder = await self._get_owned(folder_id, user_id)
         await self.repo.remove_recipe(folder.id, recipe_id)
@@ -98,9 +91,7 @@ class FoldersService:
             "per_page": per_page,
         }
 
-    # ---------- внутреннее ----------
     async def _get_owned(self, folder_id: int, user_id: int) -> Folder:
-        # чужая папка неотличима от несуществующей — не раскрываем её наличие
         folder = await self.repo.get_owned(folder_id, user_id)
         if folder is None:
             raise not_found("Папка не найдена", "folder_id")

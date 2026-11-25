@@ -1,9 +1,3 @@
-"""ЗАГЛУШКА. Таблицей recipes владеет Dev 2 (модуль recipes).
-
-Здесь — только колонки из ERD, которые нужны модулю папок для FK и чтения карточек.
-При слиянии заменить полной моделью Dev 2 (cook_time_range_id / cuisine_id получат FK на справочники).
-"""
-
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String, func

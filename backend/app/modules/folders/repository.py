@@ -11,12 +11,9 @@ class FoldersRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    # --- блокировка владельца: сериализует проверки лимитов (HLD, раздел 6) ---
     async def lock_owner(self, user_id: int) -> None:
-        # Строка users блокируется до конца транзакции; читаем её только ради блокировки.
         await self.session.execute(select(User.id).where(User.id == user_id).with_for_update())
 
-    # --- папки ---
     async def list_by_user(self, user_id: int) -> Sequence[Folder]:
         result = await self.session.execute(
             select(Folder)
@@ -46,10 +43,8 @@ class FoldersRepository:
         return folder
 
     async def delete(self, folder_id: int) -> None:
-        # строки folder_recipes уходят каскадом на уровне БД
         await self.session.execute(delete(Folder).where(Folder.id == folder_id))
 
-    # --- содержимое папок ---
     async def recipe_exists(self, recipe_id: int) -> bool:
         result = await self.session.execute(select(Recipe.id).where(Recipe.id == recipe_id))
         return result.first() is not None

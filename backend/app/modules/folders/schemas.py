@@ -24,9 +24,7 @@ class FolderOut(BaseModel):
     id: int
     user_id: int
     name: str
-    is_default: (
-        bool  # сверх спецификации: чтобы клиент отличал «Избранное» (его нельзя менять и удалять)
-    )
+    is_default: bool
 
 
 class FolderList(BaseModel):

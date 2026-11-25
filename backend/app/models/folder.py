@@ -42,10 +42,7 @@ class Folder(Base):
 
 class FolderRecipe(Base):
     __tablename__ = "folder_recipes"
-    __table_args__ = (
-        # нужен для каскада при удалении рецепта (PK начинается с folder_id)
-        Index("ix_folder_recipes_recipe_id", "recipe_id"),
-    )
+    __table_args__ = (Index("ix_folder_recipes_recipe_id", "recipe_id"),)
 
     folder_id: Mapped[int] = mapped_column(
         ForeignKey("folders.id", ondelete="CASCADE"), primary_key=True
