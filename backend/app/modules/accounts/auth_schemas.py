@@ -38,7 +38,6 @@ class RegisterResponse(BaseModel):
 
 class LoginRequest(BaseModel):
     login: str = Field(max_length=256)
-    # Политику пароля при входе не проверяем: неверные данные — всегда 401 INVALID_CREDENTIALS.
     password: str = Field(max_length=1024)
 
     @field_validator("login")

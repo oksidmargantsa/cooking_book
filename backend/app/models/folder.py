@@ -18,8 +18,6 @@ from app.models.base import Base
 
 
 class Folder(Base):
-    """Папка. «Избранное» — обычная строка с is_default = true, создаётся при регистрации."""
-
     __tablename__ = "folders"
     __table_args__ = (
         CheckConstraint(
@@ -27,7 +25,6 @@ class Folder(Base):
             name="ck_folders_name_len",
         ),
         Index("ix_folders_user_id", "user_id"),
-        # у пользователя ровно одно «Избранное»
         Index(
             "uq_folders_one_default_per_user",
             "user_id",

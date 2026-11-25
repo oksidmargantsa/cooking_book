@@ -1,8 +1,3 @@
-"""users, refresh_tokens, folders (Dev 3)
-
-Цепочка ревизий: 0001 (Dev 3) -> 0002_dictionaries (Dev 1) -> 0003_recipes (Dev 2) -> 0004_folder_recipes (Dev 3).
-"""
-
 import sqlalchemy as sa
 from alembic import op
 
