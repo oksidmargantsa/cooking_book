@@ -37,7 +37,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["sh", "-ec", "pip install -r requirements.txt && exec alembic upgrade head"]
+    command:
+      - sh
+      - -ec
+      - pip install -r requirements.txt && alembic upgrade head && exec python -m app.cli seed-ingredients
 
   api:
     <<: *backend
