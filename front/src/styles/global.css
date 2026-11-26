@@ -1,0 +1,24 @@
+@import './tokens.css';
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font: 400 14px/1.5 var(--font); color: var(--ink); background: var(--paper); font-optical-sizing: auto; }
+img, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, p { margin: 0; }
+:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+
+.t-display { font: 900 56px/60px var(--font-display); letter-spacing: -.025em; }
+.t-h1 { font: 900 40px/44px var(--font-display); letter-spacing: -.025em; }
+.t-h2 { font: 900 28px/32px var(--font-display); letter-spacing: -.02em; }
+.t-h3 { font: 900 22px/28px var(--font-display); letter-spacing: -.02em; }
+.t-title { font: 800 17px/22px var(--font-display); }
+.t-caption { font: 400 13px/17px var(--font); color: var(--grey-l); }
+@media (max-width: 767px) {
+  .t-display { font-size: 40px; line-height: 44px; }
+  .t-h1 { font-size: 32px; line-height: 36px; }
+  .t-h2 { font-size: 24px; line-height: 28px; }
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
