@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, forbidden, not_found
 from app.modules.recipes.repository import RecipeRepository
-from app.modules.recipes.schemas import RecipeInput
+from app.modules.recipes.schemas import RecipeInput, RecipePage
 from app.modules.uploads.service import UploadsService
 
 try:
@@ -49,6 +49,10 @@ class RecipeService:
         await self.repo.delete(recipe_id)
         await self.session.commit()
         await bump_catalog_version()
+
+    async def list_my(self, author_id: int, page: int, per_page: int) -> RecipePage:
+        items, total = await self.repo.list_my(author_id, page, per_page)
+        return RecipePage(items=items, total=total, page=page, per_page=per_page)
 
     async def _validate(self, author_id: int, data: RecipeInput) -> None:
         from app.modules.dictionaries.service import DictionariesService

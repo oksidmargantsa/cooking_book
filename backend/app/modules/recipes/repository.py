@@ -1,10 +1,11 @@
 from datetime import UTC, datetime
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.recipe import Recipe, RecipeCategory, RecipeDietTag, RecipeIngredient, RecipeStep
 from app.modules.recipes.schemas import RecipeInput
+from app.schemas.recipe_card import RecipeCard
 
 
 class RecipeRepository:
@@ -47,3 +48,27 @@ class RecipeRepository:
             + [RecipeCategory(recipe_id=recipe_id, category_id=id_) for id_ in data.dish_categories]
             + [RecipeDietTag(recipe_id=recipe_id, diet_tag_id=id_) for id_ in data.diet_tags]
         )
+
+    async def list_my(
+        self, author_id: int, page: int, per_page: int
+    ) -> tuple[list[RecipeCard], int]:
+        count = select(func.count()).select_from(Recipe).where(Recipe.author_id == author_id)
+        total = await self.session.scalar(count) or 0
+        offset = (page - 1) * per_page
+        if offset >= total:
+            return [], total
+        result = await self.session.execute(
+            select(
+                Recipe.id,
+                Recipe.author_id,
+                Recipe.title,
+                Recipe.photo_key,
+                Recipe.cook_time_range_id,
+                Recipe.servings,
+            )
+            .where(Recipe.author_id == author_id)
+            .order_by(Recipe.id.desc())
+            .offset(offset)
+            .limit(per_page)
+        )
+        return [RecipeCard(**row) for row in result.mappings()], total

@@ -15,6 +15,7 @@ from app.core.constants import (
     STEP_DESCRIPTION_MAX_LEN,
     UPLOAD_MAX_KEY_LEN,
 )
+from app.schemas.recipe_card import RecipeCard
 
 DictionaryId = Annotated[int, Field(strict=True, gt=0, le=POSTGRES_INTEGER_MAX)]
 PhotoKey = Annotated[str, StringConstraints(min_length=1, max_length=UPLOAD_MAX_KEY_LEN)]
@@ -64,3 +65,10 @@ class RecipeInput(BaseModel):
 
 class RecipeResult(BaseModel):
     id: int
+
+
+class RecipePage(BaseModel):
+    items: list[RecipeCard]
+    total: int
+    page: int
+    per_page: int
