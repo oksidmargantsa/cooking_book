@@ -1,4 +1,6 @@
+from datetime import datetime
 from functools import lru_cache
+from typing import Any
 from urllib.parse import quote, urlsplit
 
 import boto3
@@ -80,6 +82,25 @@ class StorageClient:
 
     def delete(self, key: str) -> None:
         self.client.delete_object(Bucket=self.bucket, Key=key)
+
+    def find_old_photos(self, cutoff: datetime) -> list[str]:
+        paginator = self.client.get_paginator("list_objects_v2")
+        pages = paginator.paginate(Bucket=self.bucket, Prefix="photos/")
+        return [
+            item["Key"]
+            for page in pages
+            for item in page.get("Contents", [])
+            if item["LastModified"] < cutoff
+        ]
+
+    def is_old(self, key: str, cutoff: datetime) -> bool:
+        try:
+            response: dict[str, Any] = self.client.head_object(Bucket=self.bucket, Key=key)
+        except ClientError as error:
+            if self._is_missing(error):
+                return False
+            raise
+        return response["LastModified"] < cutoff
 
 
 @lru_cache

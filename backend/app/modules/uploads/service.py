@@ -1,4 +1,5 @@
 from collections.abc import Callable, Sequence
+from datetime import UTC, datetime
 from re import fullmatch
 from uuid import uuid4
 
@@ -7,7 +8,7 @@ from PIL import Image
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
-from app.core.constants import UPLOAD_ALLOWED_TYPES
+from app.core.constants import UPLOAD_ALLOWED_TYPES, UPLOAD_ORPHAN_AGE
 from app.core.errors import AppError, forbidden, not_found
 from app.modules.uploads.image_processor import make_jpegs
 from app.modules.uploads.repository import UploadsRepository
@@ -74,3 +75,20 @@ class UploadsService:
             await self.repo.lock_photo(key)
             if not await storage_call(storage.exists, key):
                 raise AppError(422, "VALIDATION_ERROR", "Подтверждённое фото не найдено", field)
+
+    async def cleanup_orphans(self) -> int:
+        storage = await storage_call(get_storage)
+        cutoff = datetime.now(UTC) - UPLOAD_ORPHAN_AGE
+        deleted = 0
+        for key in await storage_call(storage.find_old_photos, cutoff):
+            photo_key = (
+                key.removesuffix("_thumb.jpg") + ".jpg" if key.endswith("_thumb.jpg") else key
+            )
+            async with self.session.begin():
+                await self.repo.lock_photo(photo_key)
+                if not await self.repo.is_referenced(photo_key) and await storage_call(
+                    storage.is_old, key, cutoff
+                ):
+                    await storage_call(storage.delete, key)
+                    deleted += 1
+        return deleted
