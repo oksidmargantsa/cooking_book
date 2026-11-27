@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, not_found
 from app.modules.accounts.preferences_repository import PreferencesRepository
+from app.modules.dictionaries.service import DictionariesService
 
 
 class PreferencesService:
@@ -13,8 +14,6 @@ class PreferencesService:
         return await self.repo.get_diet_tags(user_id)
 
     async def set_diet_tags(self, user_id: int, diet_tags: list[int]) -> list[int]:
-        from app.modules.dictionaries.service import DictionariesService
-
         if not await self.repo.lock_user(user_id):
             raise not_found("Пользователь не найден")
         missing = await DictionariesService(self.session).find_missing_ids(diet_tags=diet_tags)
