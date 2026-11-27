@@ -1,18 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cache import bump_catalog_version
 from app.core.errors import AppError, forbidden, not_found
+from app.modules.dictionaries.service import DictionariesService
 from app.modules.recipes.repository import RecipeRepository
 from app.modules.recipes.schemas import RecipeInput, RecipePage
 from app.modules.uploads.service import UploadsService
-
-try:
-    from app.core.cache import bump_catalog_version
-except ModuleNotFoundError as error:
-    if error.name != "app.core.cache":
-        raise
-
-    async def bump_catalog_version() -> None:
-        pass
 
 
 class RecipeService:
@@ -55,8 +48,6 @@ class RecipeService:
         return RecipePage(items=items, total=total, page=page, per_page=per_page)
 
     async def _validate(self, author_id: int, data: RecipeInput) -> None:
-        from app.modules.dictionaries.service import DictionariesService
-
         missing = await DictionariesService(self.session).find_missing_ids(
             ingredients=data.ingredients,
             cuisines=() if data.cuisine_id is None else (data.cuisine_id,),
