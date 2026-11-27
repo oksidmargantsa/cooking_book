@@ -10,7 +10,6 @@ async function allIds(fid: number) {
   for (;;) { const r = await foldersApi.recipes(fid, p, 50); out.push(...r.items.map((i) => i.id)); if (p * r.per_page >= r.total) return out; p++; }
 }
 
-/** «Добавить в папки»: чекбоксы по всем папкам пользователя. */
 export function FolderSheet({ recipeId, onClose }: { recipeId: number; onClose: () => void }) {
   const qc = useQueryClient();
   const folders = useQuery({ queryKey: ['folders'], queryFn: foldersApi.list });
