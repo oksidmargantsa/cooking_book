@@ -1,0 +1,6 @@
+.set { display: grid; gap: var(--s5); }
+.set__menu { display: grid; gap: 2px; padding: var(--s2); align-content: start; }
+.set__item { display: flex; align-items: center; gap: var(--s3); min-height: 44px; padding: 0 var(--s4); border-radius: var(--r-pill); font: 600 14px/1 var(--font); text-align: left; }
+.set__item.active { background: var(--lime); } .set__item--danger { color: var(--error); } .set__item:hover:not(.active) { background: var(--paper); }
+.set__body { max-width: 560px; }
+@media (min-width: 1200px) { .set { grid-template-columns: 280px 1fr; gap: var(--s8); align-items: start; } }
