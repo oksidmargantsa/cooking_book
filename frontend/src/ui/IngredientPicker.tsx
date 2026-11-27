@@ -4,7 +4,7 @@ import { Icon } from './Icon';
 import { Banner } from './Banner';
 
 const norm = (s: string) => s.toLowerCase().replace(/ё/g, 'е');
-/** Выбор ингредиентов из справочника. Список открывается по фокусу, ищет по подстроке и по началу слова («курица» → «Куриное филе»). */
+
 export function IngredientPicker({ value, onChange, max, error }: { value: number[]; onChange: (v: number[]) => void; max: number; error?: string }) {
   const d = useDictionary('ingredients'); const [term, setTerm] = useState(''); const [open, setOpen] = useState(false);
   const t = norm(term.trim()); const stem = t.slice(0, Math.max(3, t.length - 2));
