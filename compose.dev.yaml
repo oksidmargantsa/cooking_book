@@ -2,9 +2,5 @@ services:
   migrate:
     environment: &local-database
       DATABASE_URL: postgresql+asyncpg://recipes:recipes@postgres:5432/recipes
-    command:
-      - sh
-      - -ec
-      - pip install -r requirements.txt && python -m app.dev_schema && exec python -m app.cli seed-ingredients
   api:
     environment: *local-database
