@@ -6,3 +6,6 @@ pydantic-settings
 PyJWT
 argon2-cffi
 alembic
+boto3
+Pillow
+redis
