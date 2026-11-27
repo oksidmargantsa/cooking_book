@@ -1,4 +1,5 @@
 from app.models.base import Base
+from app.models.dictionary import CookTimeRange, Cuisine, DietTag, DishCategory
 from app.models.folder import Folder, FolderRecipe
 from app.models.ingredient import Ingredient
 from app.models.recipe import Recipe, RecipeCategory, RecipeDietTag, RecipeIngredient, RecipeStep
@@ -12,6 +13,10 @@ __all__ = [
     "Folder",
     "FolderRecipe",
     "Ingredient",
+    "Cuisine",
+    "DietTag",
+    "DishCategory",
+    "CookTimeRange",
     "Recipe",
     "RecipeCategory",
     "RecipeDietTag",
