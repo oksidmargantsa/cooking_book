@@ -13,7 +13,18 @@ Copy-Item backend/.env.example backend/.env
 docker compose up -d api
 ```
 
-При запуске Compose применяет миграции Alembic к PostgreSQL 16 и загружает русский справочник из `backend/data/ingredients_ru.csv`. Загрузка работает из файла в репозитории. Swagger доступен по адресу [localhost:8000/docs](http://localhost:8000/docs).
+В обычном и dev-режиме Compose сначала применяет миграции Alembic к PostgreSQL 16, затем загружает русский справочник из `backend/data/ingredients_ru.csv`. Swagger доступен по адресу [localhost:8000/docs](http://localhost:8000/docs).
+
+```powershell
+docker compose -f compose.yaml -f compose.dev.yaml up -d api
+```
+
+Для базы, ранее созданной через Alembic, достаточно обычного запуска. Если существующую dev-базу создал `app.dev_schema`, проверьте, что в ней уже есть таблицы `users`, `refresh_tokens` и `folders`, а таблица `alembic_version` отсутствует. Для такой базы один раз отметьте исходную ревизию, затем запустите сервисы с тем же томом PostgreSQL.
+
+```powershell
+docker compose -f compose.yaml -f compose.dev.yaml run --rm migrate sh -ec 'pip install -r requirements.txt && alembic stamp 0001_users_auth_folders'
+docker compose -f compose.yaml -f compose.dev.yaml up -d api
+```
 
 ## Справочник ингредиентов
 
