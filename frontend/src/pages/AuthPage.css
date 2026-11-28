@@ -1,0 +1,25 @@
+.auth { min-height: 100vh; display: flex; flex-direction: column; background: var(--orange); }
+.auth__hero { position: relative; overflow: hidden; color: var(--white); padding: var(--s6) var(--s5) var(--s8); }
+.auth__hero::before { content: ''; position: absolute; right: -120px; top: -160px; width: 420px; height: 420px; border-radius: 50%; background: rgba(255,255,255,.07); }
+.auth__brand { position: relative; display: flex; align-items: center; gap: var(--s3); font: 900 22px/1 var(--font-display); letter-spacing: -.02em; }
+.auth__logo { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 14px; background: var(--lime); color: var(--ink); }
+.auth__title { position: relative; margin-top: var(--s8); }
+.auth__title em { font-style: normal; color: var(--ink); }
+.auth__lead { position: relative; margin-top: var(--s4); max-width: 420px; font: 400 16px/24px var(--font); opacity: .95; display: none; }
+.plate { position: absolute; border-radius: 50%; background: var(--white); display: grid; place-items: center; box-shadow: 0 0 0 0 transparent; }
+.plate > i { width: 78%; height: 78%; border-radius: 50%; display: block; }
+.sticker { position: absolute; padding: 6px 12px; border: 2px solid var(--ink); border-radius: 10px; background: var(--yellow); color: var(--ink); font: 700 12px/1 var(--font); }
+.auth__panel { flex: 1; display: flex; align-items: flex-start; justify-content: center; background: var(--paper); border-radius: var(--r-modal) var(--r-modal) 0 0; padding: var(--s6) var(--s5) var(--s8); }
+.auth__form { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: var(--s4); }
+.auth__switch { text-align: center; font: 500 13px/18px var(--font); color: var(--grey); }
+.auth__switch a { display: block; color: var(--orange); font-weight: 600; margin-top: 2px; }
+.auth__desktop-title { display: none; }
+
+@media (min-width: 768px) {
+  .auth { flex-direction: row; padding: 0; }
+  .auth__hero { flex: 1 1 52%; padding: 56px; border-radius: 0 var(--r-modal) var(--r-modal) 0; min-height: 100vh; }
+  .auth__title { margin-top: 160px; }
+  .auth__lead { display: block; }
+  .auth__panel { flex: 1 1 48%; align-items: center; border-radius: 0; padding: var(--s12); }
+  .auth__desktop-title { display: block; }
+}
