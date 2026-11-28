@@ -10,7 +10,7 @@ export function useFavorites() {
 
   const ids = useQuery({
     queryKey: ['fav-ids', folderId], enabled: !!user && folderId !== null,
-    queryFn: async () => { 
+    queryFn: async () => {
       const out: number[] = []; let page = 1;
       for (;;) { const r = await foldersApi.recipes(folderId!, page, 50); out.push(...r.items.map((i) => i.id)); if (page * r.per_page >= r.total) break; page++; }
       return out;

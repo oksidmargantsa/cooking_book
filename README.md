@@ -1,6 +1,6 @@
 # Cooking Book
 
-Бэкенд каталога рецептов на FastAPI и PostgreSQL.
+Каталог рецептов с интерфейсом на React, API на FastAPI и базой PostgreSQL.
 
 [Правила проекта](CODING_GUIDELINES.md).
 
@@ -10,21 +10,37 @@
 
 ```powershell
 Copy-Item backend/.env.example backend/.env
-docker compose up -d api
+docker compose up -d --build api
 ```
 
 В обычном и dev-режиме Compose сначала применяет миграции Alembic к PostgreSQL 16, затем загружает русский справочник из `backend/data/ingredients_ru.csv`. Swagger доступен по адресу [localhost:8000/docs](http://localhost:8000/docs).
 
 ```powershell
-docker compose -f compose.yaml -f compose.dev.yaml up -d api
+docker compose -f compose.yaml -f compose.dev.yaml up -d --build api
 ```
 
 Для базы, ранее созданной через Alembic, достаточно обычного запуска. Если существующую dev-базу создал `app.dev_schema`, проверьте, что в ней уже есть таблицы `users`, `refresh_tokens` и `folders`, а таблица `alembic_version` отсутствует. Для такой базы один раз отметьте исходную ревизию, затем запустите сервисы с тем же томом PostgreSQL.
 
 ```powershell
 docker compose -f compose.yaml -f compose.dev.yaml run --rm migrate sh -ec 'pip install -r requirements.txt && alembic stamp 0001_users_auth_folders'
-docker compose -f compose.yaml -f compose.dev.yaml up -d api
+docker compose -f compose.yaml -f compose.dev.yaml up -d --build api
 ```
+
+### Фронтенд
+
+Первый запуск Compose собирает MinIO из зафиксированного исходного релиза. Сборка может занять несколько минут. Swagger доступен на порту 8000, а MinIO для загрузки фото — на порту 9000.
+
+Запустите интерфейс в отдельном терминале:
+
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
+
+Откройте [localhost:5173](http://localhost:5173) и зарегистрируйтесь. Vite передаёт запросы `/api/v1` в FastAPI, а `/storage` — в MinIO.
+
+Для запуска макета с тестовыми данными установите `$env:VITE_USE_MOCK = "true"` перед командой `npm run dev`. В этом режиме Docker не требуется. Тестовый логин — `anna_cook`, пароль — `Password1`. Настройка `use_mock` в localStorage имеет приоритет над переменной окружения.
 
 ## Справочник ингредиентов
 
@@ -46,7 +62,7 @@ docker compose exec -T postgres psql -X -U recipes -d recipes_base -v ON_ERROR_S
 docker compose exec -T postgres psql -U recipes -d recipes_base -c 'SELECT count(*) FROM ingredients;'
 ```
 
-Чтобы открыть восстановленную базу в приложении, укажите `postgresql+asyncpg://recipes:recipes@postgres:5432/recipes_base` в `DATABASE_URL` в файле `backend/.env` и выполните `docker compose up -d api`.
+Чтобы открыть восстановленную базу в приложении, укажите `postgresql+asyncpg://recipes:recipes@postgres:5432/recipes_base` в `DATABASE_URL` в файле `backend/.env` и выполните `docker compose up -d --build api`.
 
 Для пересборки дампа после изменения CSV используйте отдельный Compose-проект с пустым томом. В снимок попадут схема и стартовый справочник без данных разработчиков.
 
