@@ -4,7 +4,7 @@ import { isMock } from './mode';
 import { mockRequest } from './mock';
 export { ApiError };
 
-export const API_BASE = '/api';
+export const API_BASE = '/api/v1';
 
 export type Query = Record<string, string | number | boolean | (string | number)[] | null | undefined>;
 
