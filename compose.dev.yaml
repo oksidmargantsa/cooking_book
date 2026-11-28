@@ -1,0 +1,7 @@
+services:
+  migrate:
+    environment: &local-database
+      DATABASE_URL: postgresql+asyncpg://recipes:recipes@postgres:5432/recipes
+  api:
+    environment:
+      <<: *local-database

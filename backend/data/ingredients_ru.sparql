@@ -1,0 +1,27 @@
+SELECT ?item ?name (COUNT(DISTINCT ?dish) AS ?uses) WHERE {
+  {
+    ?dish wdt:P31/wdt:P279* wd:Q746549 ;
+          wdt:P186 ?item .
+    {
+      ?item wdt:P31?/wdt:P279* wd:Q2095 .
+    } UNION {
+      # Pantry staples that are not always classified as food.
+      VALUES ?item { wd:Q283 wd:Q41354 wd:Q179731 wd:Q29476 wd:Q23392 wd:Q94787 wd:Q26686 }
+    }
+  } UNION {
+    ?item (wdt:P31|wdt:P279) wd:Q25403900 .
+  }
+
+  ?item rdfs:label ?name .
+  FILTER(LANG(?name) = "ru")
+  FILTER NOT EXISTS { ?item wdt:P31 wd:Q746549 . }
+  FILTER(!STRSTARTS(LCASE(STR(?name)), "рецепт:"))
+
+  # Exclude mislabeled ingredients and entries describing processes or diets.
+  FILTER(?item NOT IN (
+    wd:Q1160961, wd:Q70608, wd:Q153314, wd:Q7201457, wd:Q494268, wd:Q511687,
+    wd:Q2845, wd:Q3324035, wd:Q163076
+  ))
+}
+GROUP BY ?item ?name
+ORDER BY DESC(?uses) ?item

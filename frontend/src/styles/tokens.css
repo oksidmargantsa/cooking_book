@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap');
+
+
+:root {
+  /* основные */
+  --orange: #DC380A; --ink: #1D1230; --lime: #B6F23A; --lilac: #CBB9FF;
+  /* дополнительные (подложки блюд, теги, плитки) */
+  --yellow: #FFC83D; --peach: #FFC2B0; --mint: #CFF3C2; --orange-light: #FF6A3D;
+  /* нейтральные и системные */
+  --paper: #F5F2F9; --white: #FFFFFF; --line: #E3DDEC; --line-2: #D3CBE0;
+  --grey: #6B6479; --grey-l: #767084;
+  --error: #C42318; --error-bg: #FDE8E4; --success: #1F9D55;
+
+  --font-display: 'Inter', 'Manrope', 'Helvetica Neue', Arial, sans-serif;
+  --font: 'Inter', 'Manrope', 'Helvetica Neue', Arial, sans-serif;
+
+  /* шкала отступов*/
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s12: 48px; --s16: 64px;
+  /* радиусы */
+  --r-tag: 12px; --r-field: 16px; --r-photo: 20px; --r-card: 28px; --r-modal: 32px; --r-pill: 999px;
+  /* тени */
+  --shadow-sm: 0 4px 6px rgba(29, 18, 48, .12);
+  --shadow-lg: 0 14px 16px rgba(29, 18, 48, .14);
+
+  --ease: 150ms ease-out;
+  --tap: 44px;
+}

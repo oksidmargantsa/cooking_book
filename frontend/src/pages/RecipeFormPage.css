@@ -1,0 +1,9 @@
+.rf { display: grid; gap: var(--s6); }
+.rf__cols { display: grid; gap: var(--s6); } .rf__col { display: grid; gap: var(--s4); align-content: start; }
+.rf__card { padding: var(--s5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); display: grid; gap: var(--s3); }
+.rf__ta { width: 100%; min-height: 96px; padding: var(--s3) var(--s4); border: 2px solid var(--line-2); border-radius: var(--r-field); background: var(--white); resize: vertical; font: 400 15px/22px var(--font); }
+.rf__ta:focus { outline: 0; border-color: var(--ink); box-shadow: 0 0 0 3px var(--lime); }
+.rf__row { display: flex; align-items: center; gap: var(--s2); min-height: 44px; padding: 0 var(--s4); border: 1px solid var(--line); border-radius: var(--r-field); background: var(--paper); justify-content: space-between; }
+.rf__chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.rf__actions { display: grid; gap: var(--s2); }
+@media (min-width: 1200px) { .rf__cols { grid-template-columns: 1fr 1fr; gap: var(--s8); } .rf__actions { grid-template-columns: auto auto; justify-content: start; } }
