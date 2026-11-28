@@ -29,7 +29,7 @@ export interface RecipeInput {
 }
 export interface Recipe extends RecipeInput { id: number; author_id: number; created_at: string; updated_at: string }
 
-export interface Folder { id: number; user_id: number; name: string }
+export interface Folder { id: number; user_id: number; name: string; is_default: boolean }
 
 export interface RecipeSearchParams {
   ingredients?: number[];
@@ -42,12 +42,16 @@ export interface RecipeSearchParams {
   per_page?: number;
 }
 
+export const FAVORITES_NAME = 'Избранное';
+
 export const LIMITS = {
   ingredientsPerRecipe: 30,
   stepsPerRecipe: 50,
   recipesPerAuthor: 1000,
-  recipesPerFolder: 50,
-  favorites: 100,
+  folders: 50,
+  folderNameLength: 150,
+  recipesPerFolder: 100,
+  favorites: 1000,
   photoMaxBytes: 10 * 1024 * 1024,
   photoTypes: ['image/jpeg', 'image/png', 'image/webp'],
   listBlock: 10,

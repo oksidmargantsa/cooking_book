@@ -1,6 +1,6 @@
 import { ApiError } from './errors';
 import { tokenStore } from './tokens';
-import type { Folder, Recipe, RecipeCard } from './types';
+import { FAVORITES_NAME, LIMITS, type Folder, type Recipe, type RecipeCard } from './types';
 
 type U = { id: number; login: string; password: string; diet_tags: number[] };
 type DB = { users: U[]; recipes: Recipe[]; folders: Folder[]; links: { f: number; r: number }[]; seq: number };
@@ -21,9 +21,27 @@ const seed = (): DB => ({ seq: 100,
   recipes: [rec(1, 1, 'Сливочная курица с грибами', [1, 2, 3, 4, 5], [3], [2], 8, 3, 4), rec(2, 1, 'Борщ с пампушками', [6, 7, 8, 4], [], [1], 5, 4, 6), rec(3, 1, 'Салат с авокадо и нутом', [9, 10, 17], [2, 4], [4], 8, 1, 2),
     rec(4, 2, 'Паста карбонара', [11, 12, 13, 14], [], [2], 2, 2, 2), rec(5, 2, 'Том ям с креветками и кокосовым молоком', [15, 16, 17], [1], [1], 3, 3, 3), rec(6, 2, 'Мохито', [17, 18], [2, 3, 4], [6], 8, 1, 1),
     rec(7, 2, 'Курица карри', [1, 16, 19], [1], [2], 1, 3, 4), rec(8, 2, 'Овощная чаша с рисом', [19, 20, 9], [2, 3], [2], 6, 2, 2)],
-  folders: [{ id: 1, user_id: 1, name: 'Избранное' }, { id: 2, user_id: 1, name: 'На ужин' }], links: [{ f: 1, r: 2 }, { f: 2, r: 4 }] });
+  folders: [{ id: 1, user_id: 1, name: FAVORITES_NAME, is_default: true }, { id: 2, user_id: 1, name: 'На ужин', is_default: false }], links: [{ f: 1, r: 2 }, { f: 2, r: 4 }] });
 
-const load = (): DB => { try { return JSON.parse(localStorage.getItem('mock_db') ?? '') as DB; } catch { return seed(); } };
+const load = (): DB => {
+  try {
+    const db = JSON.parse(localStorage.getItem('mock_db') ?? '') as DB;
+    for (const folder of db.folders) {
+      folder.is_default ??= folder.name === FAVORITES_NAME;
+    }
+    return db;
+  } catch {
+    return seed();
+  }
+};
+
+function folderName(value: unknown): string {
+  const name = typeof value === 'string' ? value.trim() : '';
+  if (!name || [...name].length > LIMITS.folderNameLength || name.toLowerCase() === FAVORITES_NAME.toLowerCase()) {
+    throw new ApiError(422, 'VALIDATION_ERROR');
+  }
+  return name;
+}
 const save = (db: DB) => { try { localStorage.setItem('mock_db', JSON.stringify(db)); } catch { /* квота */ } };
 const arr = (v: unknown): number[] => (Array.isArray(v) ? v.map(Number) : v == null ? [] : [Number(v)]);
 const card = (r: Recipe): RecipeCard => ({ id: r.id, author_id: r.author_id, title: r.title, photo_key: r.photo_key, cook_time_range_id: r.cook_time_range_id, servings: r.servings });
@@ -43,7 +61,7 @@ export async function mockRequest<T>(path: string, o: { method?: string; query?:
   if (path === '/auth/register' && m === 'POST') {
     if (db.users.some((u) => u.login === b.login)) throw new ApiError(409, 'LOGIN_EXISTS');
     const u = { id: db.seq++, login: b.login, password: b.password, diet_tags: [] }; db.users.push(u);
-    db.folders.push({ id: db.seq++, user_id: u.id, name: 'Избранное' }); return done({ id: u.id, login: u.login });
+    db.folders.push({ id: db.seq++, user_id: u.id, name: FAVORITES_NAME, is_default: true }); return done({ id: u.id, login: u.login });
   }
   if (path === '/auth/login') {
     const u = db.users.find((v) => v.login === b.login && v.password === b.password);
@@ -76,24 +94,46 @@ export async function mockRequest<T>(path: string, o: { method?: string; query?:
     if (m === 'PUT') { Object.assign(r, b, { updated_at: new Date().toISOString() }); return done({ id: r.id }); }
     db.recipes = db.recipes.filter((v) => v !== r); db.links = db.links.filter((l) => l.r !== r.id); return done(undefined);
   }
-  if (path === '/folders' && m === 'GET') return { items: db.folders.filter((f) => f.user_id === need().id) } as T;
+  if (path === '/folders' && m === 'GET') {
+    const userId = need().id;
+    const items = db.folders.filter((folder) => folder.user_id === userId)
+      .sort((a, b) => Number(b.is_default) - Number(a.is_default) || a.id - b.id);
+    return { items } as T;
+  }
   if (path === '/folders' && m === 'POST') {
-    const mine = db.folders.filter((f) => f.user_id === need().id);
-    if (mine.length >= 50) throw new ApiError(409, 'FOLDERS_LIMIT');
-    if (mine.some((f) => f.name.toLowerCase() === String(b.name).toLowerCase())) throw new ApiError(409, 'FOLDER_EXISTS');
-    const f = { id: db.seq++, user_id: me!.id, name: b.name }; db.folders.push(f); return done({ id: f.id });
+    const userId = need().id;
+    const name = folderName(b.name);
+    const mine = db.folders.filter((folder) => folder.user_id === userId && !folder.is_default);
+    if (mine.length >= LIMITS.folders) throw new ApiError(422, 'FOLDERS_LIMIT_EXCEEDED');
+    const f = { id: db.seq++, user_id: userId, name, is_default: false };
+    db.folders.push(f);
+    return done({ id: f.id });
   }
   if ((x = path.match(/^\/folders\/(\d+)$/))) {
     const f = ownFolder(Number(x[1]));
-    if (m === 'PATCH') { f.name = b.name; return done({ id: f.id, name: f.name }); }
+    if (m === 'PATCH') {
+      const name = folderName(b.name);
+      if (f.is_default) throw new ApiError(403, 'FORBIDDEN');
+      f.name = name;
+      return done({ id: f.id, name: f.name });
+    }
+    if (f.is_default) throw new ApiError(403, 'FORBIDDEN');
     db.folders = db.folders.filter((v) => v !== f); db.links = db.links.filter((l) => l.f !== f.id); return done(undefined);
   }
   if ((x = path.match(/^\/folders\/(\d+)\/recipes\/(\d+)$/))) {
-    const f = ownFolder(Number(x[1])), rid = Number(x[2]); find(rid);
-    db.links = db.links.filter((l) => !(l.f === f.id && l.r === rid));
+    const f = ownFolder(Number(x[1])), rid = Number(x[2]);
     if (m === 'POST') {
-      if (db.links.filter((l) => l.f === f.id).length >= (f.name === 'Избранное' ? 100 : 50)) throw new ApiError(409, 'FOLDER_FULL');
+      find(rid);
+      const links = db.links.filter((link) => link.f === f.id);
+      if (links.some((link) => link.r === rid)) return undefined as T;
+      const limit = f.is_default ? LIMITS.favorites : LIMITS.recipesPerFolder;
+      if (links.length >= limit) {
+        const code = f.is_default ? 'FAVORITES_LIMIT_EXCEEDED' : 'FOLDER_RECIPES_LIMIT_EXCEEDED';
+        throw new ApiError(422, code);
+      }
       db.links.push({ f: f.id, r: rid });
+    } else {
+      db.links = db.links.filter((link) => !(link.f === f.id && link.r === rid));
     }
     return done(undefined);
   }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { usersApi } from '@/api/endpoints';
+import { LIMITS } from '@/api/types';
 import { useAuth } from '@/auth/AuthContext';
 import { useDictionary } from '@/hooks/useDictionary';
 import { useFolders } from '@/hooks/useFolderTotals';
@@ -19,7 +20,7 @@ export default function ProfilePage() {
   const [sel, setSel] = useState<number[] | null>(null); const cur = sel ?? user?.diet_tags ?? [];
   const save = useMutation({ mutationFn: () => usersApi.savePreferences(cur), onSuccess: (r) => { if (user) setUser({ ...user, diet_tags: r.diet_tags }); setSel(null); } });
   if (!user) return null;
-  const fav = f.folders.findIndex((x) => x.name.trim().toLowerCase() === 'избранное');
+  const fav = f.folders.findIndex((x) => x.is_default);
   const metric = (n: string | number, l: string, bg: string) => <div className="prof__metric" style={{ background: bg }}><div className="prof__num">{n}</div><div className="prof__lbl">{l}</div></div>;
   return (
     <div className="prof">
@@ -29,7 +30,7 @@ export default function ProfilePage() {
           <div><p className="t-title">{user.login}</p><Link to="/settings/diet" className="t-caption">Настройки</Link></div>
         </div>
         <div className="prof__metrics">
-          {metric(mine.data?.total ?? '–', 'рецептов', 'var(--yellow)')}{metric(fav >= 0 ? f.totalOf(fav) ?? '–' : 0, 'избранных', 'var(--peach)')}{metric(`${f.folders.length}/50`, 'папок', 'var(--lilac)')}
+          {metric(mine.data?.total ?? '–', 'рецептов', 'var(--yellow)')}{metric(fav >= 0 ? f.totalOf(fav) ?? '–' : 0, 'избранных', 'var(--peach)')}{metric(`${f.folders.filter((folder) => !folder.is_default).length}/${LIMITS.folders}`, 'папок', 'var(--lilac)')}
         </div>
         <div><p className="t-title" style={{ marginBottom: 8 }}>Особенности питания</p>
           {diets.items.map((d) => <label key={d.id} style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 40, font: '500 14px var(--font)' }}>

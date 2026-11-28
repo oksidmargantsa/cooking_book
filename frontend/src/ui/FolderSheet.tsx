@@ -1,5 +1,7 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { foldersApi } from '@/api/endpoints';
+import { ApiError } from '@/api/errors';
+import { LIMITS } from '@/api/types';
 import { BottomSheet } from './Modal';
 import { Button } from './Button';
 import { Banner } from './Banner';
@@ -19,10 +21,15 @@ export function FolderSheet({ recipeId, onClose }: { recipeId: number; onClose: 
     mutationFn: ({ fid, has }: { fid: number; has: boolean }) => (has ? foldersApi.removeRecipe(fid, recipeId) : foldersApi.addRecipe(fid, recipeId)),
     onSettled: () => { ['folder-ids', 'fav-ids', 'folders', 'folder-recipes'].forEach((k) => qc.invalidateQueries({ queryKey: [k] })); },
   });
+  let errorMessage = 'Не удалось изменить папку.';
+  if (flip.error instanceof ApiError) {
+    if (flip.error.code === 'FOLDER_RECIPES_LIMIT_EXCEEDED') errorMessage = `В папке уже ${LIMITS.recipesPerFolder} рецептов.`;
+    if (flip.error.code === 'FAVORITES_LIMIT_EXCEEDED') errorMessage = `В избранном уже ${LIMITS.favorites} рецептов.`;
+  }
   return (
     <BottomSheet onClose={onClose}>
       <h2 className="t-h3" style={{ padding: '0 8px 4px' }}>Добавить в папки</h2>
-      {flip.isError && <Banner kind="error">Не удалось изменить папку. В папке может быть уже 50 рецептов (в избранном — 100).</Banner>}
+      {flip.isError && <Banner kind="error">{errorMessage}</Banner>}
       {list.map((f, i) => { const has = members[i]?.data?.includes(recipeId) ?? false; return (
         <button key={f.id} role="checkbox" aria-checked={has} onClick={() => flip.mutate({ fid: f.id, has })}
           style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 48, padding: '0 8px', textAlign: 'left', font: '600 15px var(--font)' }}>

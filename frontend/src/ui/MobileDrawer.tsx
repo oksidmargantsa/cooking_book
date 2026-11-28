@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
-import { useFolders, isFavName } from '@/hooks/useFolderTotals';
+import { useFolders } from '@/hooks/useFolderTotals';
 import { Icon, type IconName } from './Icon';
 import { Button } from './Button';
 
 const DOTS = ['var(--lilac)', 'var(--yellow)', 'var(--lime)', 'var(--peach)', 'var(--mint)'];
 function FolderPills({ onClose }: { onClose: () => void }) {
-  const f = useFolders(); const list = f.folders.filter((x) => !isFavName(x.name)).slice(0, 5);
+  const f = useFolders(); const list = f.folders.filter((x) => !x.is_default).slice(0, 5);
   return <div className="drawer__sub">{list.map((x) => <Link key={x.id} to={`/folders/${x.id}`} className="drawer__pill" onClick={onClose}><i style={{ background: DOTS[x.id % DOTS.length] }} />{x.name}</Link>)}</div>;
 }
 
