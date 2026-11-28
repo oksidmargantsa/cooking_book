@@ -82,7 +82,7 @@ async def delete_folder(
 
 @router.post(
     "/{folder_id}/recipes/{recipe_id}",
-    status_code=201,
+    status_code=204,
     response_class=Response,
     responses={
         422: {
@@ -95,7 +95,7 @@ async def add_recipe_to_folder(
     folder_id: int, recipe_id: int, user_id: CurrentUserId, service: FoldersServiceDep
 ) -> Response:
     await service.add_recipe(user_id, folder_id, recipe_id)
-    return Response(status_code=201)
+    return Response(status_code=204)
 
 
 @router.delete("/{folder_id}/recipes/{recipe_id}", status_code=204, response_class=Response)
